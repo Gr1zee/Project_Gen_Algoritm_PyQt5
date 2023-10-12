@@ -1,5 +1,5 @@
 import sys, random
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QButtonGroup, QRadioButton, QLabel, QTextBrowser
+from PyQt5.QtWidgets import QApplication, QLineEdit, QWidget, QPushButton, QButtonGroup, QRadioButton, QLabel, QTextBrowser
 
 
 class GenAlgoritmVisualisation(QWidget):
@@ -14,6 +14,20 @@ class GenAlgoritmVisualisation(QWidget):
         self.generations_field = QTextBrowser(self)
         self.generations_field.setFixedSize(400, 200)
         self.generations_field.move(390, 10)
+        
+        self.text_len = QLabel(self)
+        self.text_len.move(5, 20)
+        self.text_len.setText("Введите кол-во особей в одном поколении:")
+        
+        self.len_population = QLineEdit(self)
+        self.len_population.move(5, 45)
+        
+        self.text_len_c = QLabel(self)
+        self.text_len_c.move(5, 70)
+        self.text_len_c.setText("Введите кол-во символов в одной особи:")
+        
+        self.len_char = QLineEdit(self)
+        self.len_char.move(5, 100)
 
         self.results_text = QLabel(self)
         self.results_text.setText("Результаты:")
@@ -29,9 +43,9 @@ class GenAlgoritmVisualisation(QWidget):
         self.start_button.setText("Сгенерировать")
 
     def start_generate(self):
-
         self.generations_field.setText('')
         self.generate_population(0, 6, 5)
+        
     def generate_character(self, length_character):
         character = ""
         for _ in range(length_character):
@@ -107,6 +121,8 @@ class GenAlgoritmVisualisation(QWidget):
     def generate_population(self, number_of_generations, len_character, len_population, the_sought_character="",
                             mutation_chance=5):
         find_best_character = False
+        len_population = int(self.len_population.text())
+        len_character = int(self.len_char.text())
         if the_sought_character == "":
             the_sought_character = "1" * len_character
         generation_counter = 0
