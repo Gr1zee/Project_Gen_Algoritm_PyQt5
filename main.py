@@ -1,5 +1,5 @@
 import sys, random
-from PyQt5.QtWidgets import QApplication, QLineEdit, QWidget, QPushButton, QButtonGroup, QRadioButton, QLabel, QTextBrowser
+from PyQt5.QtWidgets import QApplication, QLineEdit, QWidget, QPushButton, QRadioButton, QLabel, QTextBrowser
 
 
 class GenAlgoritmVisualisation(QWidget):
@@ -28,6 +28,14 @@ class GenAlgoritmVisualisation(QWidget):
         
         self.len_char = QLineEdit(self)
         self.len_char.move(5, 100)
+        
+        self.text_chance = QLabel(self)
+        self.text_chance.move(5, 130)
+        self.text_chance.setText("Введите шанс мутации:")
+        
+        self.chance_mutation = QLineEdit(self)
+        self.chance_mutation.move(5, 160)
+        self.chance_mutation.setText("5")
 
         self.results_text = QLabel(self)
         self.results_text.setText("Результаты:")
@@ -96,7 +104,7 @@ class GenAlgoritmVisualisation(QWidget):
     def mutation(self, character, chance_mutation):
         mutated_character = ""
         for i in range(len(character)):
-            mutation_check = random.randint(0, 1 / (chance_mutation / 100))
+            mutation_check = random.randint(0, 1 // (chance_mutation / 100))
             if mutation_check == 1 and character[i] == "0":
                 mutated_character += "1"
             elif mutation_check == 1 and character[i] == "1":
@@ -118,11 +126,23 @@ class GenAlgoritmVisualisation(QWidget):
         mutated_population = self.mutation_population(parent_population, chance_mutation)
         return mutated_population
 
-    def generate_population(self, number_of_generations, len_character, len_population, the_sought_character="",
-                            mutation_chance=5):
+    def generate_population(self, number_of_generations, len_character, len_population, the_sought_character=""):
         find_best_character = False
-        len_population = int(self.len_population.text())
-        len_character = int(self.len_char.text())
+        try:
+            len_population = int(self.len_population.text())
+        except Exception:
+            self.generations_field.insertPlainText("Ошибка генерации: не указано количество особей в популяции")
+            return
+        try:
+            len_character = int(self.len_char.text())
+        except Exception:
+            self.generations_field.insertPlainText("Ошибка генерации: не указана длина особи")
+            return
+        try:
+            mutation_chance = int(self.chance_mutation.text())
+        except Exception:
+            self.generations_field.insertPlainText("Ошибка генерации: не указан шанс мутации")
+            return
         if the_sought_character == "":
             the_sought_character = "1" * len_character
         generation_counter = 0
