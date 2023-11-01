@@ -1,6 +1,8 @@
 import sys, random
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 
 class GenAlgoritmVisualisation(QMainWindow):
     def __init__(self):
@@ -10,6 +12,13 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.start_button.clicked.connect(self.start_generate)
         self.clear_button.clicked.connect(self.clear_all)
         
+        self.count_generation = []
+        self.rating = []
+
+        pen = pg.mkPen(color=(255, 0, 0))
+        self.graphWidget.plot(self.count_generation, self.rating, pen = pen)
+        self.graphWidget.setBackground('w')
+        
         
     def clear_all(self):
         self.generations_field.setText('')
@@ -17,10 +26,16 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.len_char.setText('')
         self.chance_mutation.setText('')
         self.text_count.setText('')
+        self.count_generation = [0]
+        self.rating = [0]
+        self.graphWidget.clear()
 
     def start_generate(self):
+        self.graphWidget.clear()
+        self.count_generation = [0]
+        self.rating = [0]
         self.generations_field.setText('')
-        self.generate_population(0)
+        self.generate_population()
 
     def generate_character(self, length_character):
         character = ""
@@ -94,7 +109,7 @@ class GenAlgoritmVisualisation(QMainWindow):
         mutated_population = self.mutation_population(parent_population, chance_mutation)
         return mutated_population
 
-    def generate_population(self, number_of_generations):
+    def generate_population(self):
         try:
             len_population = int(self.len_population.text())
         except Exception:
@@ -111,25 +126,30 @@ class GenAlgoritmVisualisation(QMainWindow):
             self.generations_field.insertPlainText("Ошибка генерации: не указан шанс мутации")
             return
         the_sought_character = "1" * len_character
-        generation_counter = 0
-        if number_of_generations == 0:
-            find_best_character = True
-        while number_of_generations > 0 or find_best_character:
+        generation_counter = 1
+        find_best_character = True
+        while find_best_character:
             first_population = self.generate_list(len_character, len_population)
             current_population = self.generation(first_population, mutation_chance)
 
             self.generations_field.insertPlainText(f"{str(current_population)} \n")
             self.generations_field.insertPlainText(f"{str(self.success_rate(current_population))} \n")
+            self.rating.append(float(self.success_rate(current_population)))
             self.generations_field.insertPlainText(f"{self.best_character(current_population)} \n")
+            
+            self.count_generation.append(generation_counter)
 
             if the_sought_character in current_population and find_best_character:
-                self.text_count.setText(f"Количество генераций - {generation_counter + 1}")
+                self.text_count.setText(f"Количество генераций - {generation_counter}")
                 break
 
             self.generations_field.insertPlainText("\n")
 
-            number_of_generations -= 1
             generation_counter += 1
+            
+        pen = pg.mkPen(color=(255, 0, 0))
+        self.graphWidget.plot(self.count_generation, self.rating, pen = pen)
+        self.graphWidget.setBackground('w')
 
 
 if __name__ == '__main__':
