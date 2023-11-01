@@ -1,59 +1,27 @@
 import sys, random
-from PyQt5.QtWidgets import QApplication, QLineEdit, QWidget, QPushButton, QRadioButton, QLabel, QTextBrowser
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
-
-class GenAlgoritmVisualisation(QWidget):
+class GenAlgoritmVisualisation(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(300, 300, 800, 400)
-        self.setWindowTitle('Генетический алгоритм')
-
-        self.generations_field = QTextBrowser(self)
-        self.generations_field.setFixedSize(400, 200)
-        self.generations_field.move(390, 10)
+        uic.loadUi('Gen_alg_ui.ui', self)
         
-        self.text_len = QLabel(self)
-        self.text_len.move(5, 20)
-        self.text_len.setText("Введите кол-во особей в одном поколении:")
-        
-        self.len_population = QLineEdit(self)
-        self.len_population.move(5, 45)
-        
-        self.text_len_c = QLabel(self)
-        self.text_len_c.move(5, 70)
-        self.text_len_c.setText("Введите кол-во символов в одной особи:")
-        
-        self.len_char = QLineEdit(self)
-        self.len_char.move(5, 100)
-        
-        self.text_chance = QLabel(self)
-        self.text_chance.move(5, 130)
-        self.text_chance.setText("Введите шанс мутации:")
-        
-        self.chance_mutation = QLineEdit(self)
-        self.chance_mutation.move(5, 160)
-        self.chance_mutation.setText("5")
-
-        self.results_text = QLabel(self)
-        self.results_text.setText("Результаты:")
-        self.results_text.move(390, 240)
-
-        self.text_count = QLabel(self)
-        self.text_count.move(480, 240)
-        self.text_count.setFixedSize(200, 20)
-
-        self.start_button = QPushButton(self)
         self.start_button.clicked.connect(self.start_generate)
-        self.start_button.move(280, 100)
-        self.start_button.setText("Сгенерировать")
+        self.clear_button.clicked.connect(self.clear_all)
+        
+        
+    def clear_all(self):
+        self.generations_field.setText('')
+        self.len_population.setText('')
+        self.len_char.setText('')
+        self.chance_mutation.setText('')
+        self.text_count.setText('')
 
     def start_generate(self):
         self.generations_field.setText('')
-        self.generate_population(0, 6, 5)
-        
+        self.generate_population(0)
+
     def generate_character(self, length_character):
         character = ""
         for _ in range(length_character):
@@ -126,8 +94,7 @@ class GenAlgoritmVisualisation(QWidget):
         mutated_population = self.mutation_population(parent_population, chance_mutation)
         return mutated_population
 
-    def generate_population(self, number_of_generations, len_character, len_population, the_sought_character=""):
-        find_best_character = False
+    def generate_population(self, number_of_generations):
         try:
             len_population = int(self.len_population.text())
         except Exception:
@@ -143,8 +110,7 @@ class GenAlgoritmVisualisation(QWidget):
         except Exception:
             self.generations_field.insertPlainText("Ошибка генерации: не указан шанс мутации")
             return
-        if the_sought_character == "":
-            the_sought_character = "1" * len_character
+        the_sought_character = "1" * len_character
         generation_counter = 0
         if number_of_generations == 0:
             find_best_character = True
