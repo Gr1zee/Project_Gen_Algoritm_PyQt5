@@ -1,7 +1,6 @@
-import sys, random
+import sys, random, sqlite3
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from pyqtgraph import PlotWidget, plot
+from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QFileDialog
 import pyqtgraph as pg
 
 class GenAlgoritmVisualisation(QMainWindow):
@@ -9,6 +8,8 @@ class GenAlgoritmVisualisation(QMainWindow):
         super().__init__()
         uic.loadUi('Gen_alg_ui.ui', self)
         
+        self.action_database.triggered.connect(self.update_database)
+    
         self.start_button.clicked.connect(self.start_generate)
         self.clear_button.clicked.connect(self.clear_all)
         
@@ -18,6 +19,19 @@ class GenAlgoritmVisualisation(QMainWindow):
         pen = pg.mkPen(color=(255, 0, 0))
         self.graphWidget.plot(self.count_generation, self.rating, pen = pen)
         self.graphWidget.setBackground('w')
+        
+    def update_database(self):
+            name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
+                                            "Как тебя зовут?")
+            
+            if ok_pressed:
+                self.user_name = name
+            
+            con = sqlite3.connect("generations_db.sqlite")
+            cur = con.cursor()
+            cur.execute(f"INSERT INTO generations(user_name, generation_count, average_rating) VALUES ('{self.user_name}', '{self.generation_counter}', '{self.average_rating}')")
+            con.commit()
+            con.close
         
         
     def clear_all(self):
@@ -110,6 +124,7 @@ class GenAlgoritmVisualisation(QMainWindow):
         return mutated_population
 
     def generate_population(self):
+        self.rating_a = 0
         try:
             len_population = int(self.len_population.text())
         except Exception:
@@ -126,7 +141,7 @@ class GenAlgoritmVisualisation(QMainWindow):
             self.generations_field.insertPlainText("Ошибка генерации: не указан шанс мутации")
             return
         the_sought_character = "1" * len_character
-        generation_counter = 1
+        self.generation_counter = 1
         find_best_character = True
         while find_best_character:
             first_population = self.generate_list(len_character, len_population)
@@ -135,17 +150,20 @@ class GenAlgoritmVisualisation(QMainWindow):
             self.generations_field.insertPlainText(f"{str(current_population)} \n")
             self.generations_field.insertPlainText(f"{str(self.success_rate(current_population))} \n")
             self.rating.append(float(self.success_rate(current_population)))
+            self.rating_a += float(self.success_rate(current_population))
             self.generations_field.insertPlainText(f"{self.best_character(current_population)} \n")
             
-            self.count_generation.append(generation_counter)
-
+            self.count_generation.append(self.generation_counter)
+            
+            self.average_rating = self.rating_a / self.generation_counter
+            
             if the_sought_character in current_population and find_best_character:
-                self.text_count.setText(f"Количество генераций - {generation_counter}")
+                self.text_count.setText(f"Количество генераций - {self.generation_counter}")
                 break
 
             self.generations_field.insertPlainText("\n")
 
-            generation_counter += 1
+            self.generation_counter += 1
             
         pen = pg.mkPen(color=(255, 0, 0))
         self.graphWidget.plot(self.count_generation, self.rating, pen = pen)
