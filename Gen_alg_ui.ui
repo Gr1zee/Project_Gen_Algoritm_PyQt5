@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>909</width>
-    <height>420</height>
+    <width>791</width>
+    <height>352</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,11 +15,8 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="1">
-     <widget class="PlotWidget" name="graphWidget" native="true"/>
-    </item>
     <item row="0" column="0" rowspan="2">
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -52,22 +49,25 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QLabel" name="text_count">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTextBrowser" name="generations_field"/>
-          </item>
-         </layout>
+         <widget class="QLabel" name="text_count">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="text_rating">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QTextBrowser" name="generations_field"/>
       </item>
      </layout>
     </item>
@@ -105,6 +105,9 @@
       </item>
      </layout>
     </item>
+    <item row="1" column="1">
+     <widget class="PlotWidget" name="graphWidget" native="true"/>
+    </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -113,7 +116,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>909</width>
+     <width>791</width>
      <height>26</height>
     </rect>
    </property>
@@ -133,7 +136,7 @@
   </action>
   <action name="action_database">
    <property name="text">
-    <string>Открыть</string>
+    <string>Записать в базу данных</string>
    </property>
   </action>
  </widget>

@@ -22,14 +22,17 @@ class GenAlgoritmVisualisation(QMainWindow):
         
     def update_database(self):
             name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
-                                            "Как тебя зовут?")
+                                            "Как вас зовут?")
             
             if ok_pressed:
                 self.user_name = name
+            else:
+                self.generations_field.insertPlainText("Ошибка записи в базу данных: Введите имя пользователя")
+                return 0
             
             con = sqlite3.connect("generations_db.sqlite")
             cur = con.cursor()
-            cur.execute(f"INSERT INTO generations(user_name, generation_count, average_rating) VALUES ('{self.user_name}', '{self.generation_counter}', '{self.average_rating}')")
+            cur.execute(f"INSERT INTO generations(user_name, generation_count, average_rating, len_population, len_character, chance_mutation, rating_lst) VALUES ('{self.user_name}', '{self.generation_counter}', '{round(self.average_rating, 3)}', '{int(self.len_population.text())}', '{int(self.len_char.text())}', '{int(self.chance_mutation.text())}', '{str(self.rating)}')")
             con.commit()
             con.close
         
@@ -159,6 +162,7 @@ class GenAlgoritmVisualisation(QMainWindow):
             
             if the_sought_character in current_population and find_best_character:
                 self.text_count.setText(f"Количество генераций - {self.generation_counter}")
+                self.text_rating.setText(f"Средний рейтинг всех генераций- {round(self.average_rating, 3)}")
                 break
 
             self.generations_field.insertPlainText("\n")
