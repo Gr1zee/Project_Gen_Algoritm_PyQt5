@@ -1,5 +1,6 @@
 import sys, random, sqlite3
 from PyQt5 import uic
+from PyQt5 import QtWidget
 from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QFileDialog
 import pyqtgraph as pg
 
@@ -9,6 +10,7 @@ class GenAlgoritmVisualisation(QMainWindow):
         uic.loadUi('Gen_alg_ui.ui', self)
         
         self.action_database.triggered.connect(self.update_database)
+        self.action_database_read.triggered.connect(self.read_database)
     
         self.start_button.clicked.connect(self.start_generate)
         self.clear_button.clicked.connect(self.clear_all)
@@ -17,18 +19,23 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.rating = []
 
         pen = pg.mkPen(color=(255, 0, 0))
-        self.graphWidget.plot(self.count_generation, self.rating, pen = pen)
+        self.graphWidget.plot(self.count_generation, self.rating, pen = pen, symbol="+", symbolSize=20, symbolBrush="b")
         self.graphWidget.setBackground('w')
+        self.graphWidget.setTitle("Средний рейтинг генераций")
+        self.graphWidget.setLabel("left", "Средний рейтинг генераций")
+        self.graphWidget.setLabel("bottom", "Кол-во генераций")
         
     def update_database(self):
             name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
                                             "Как вас зовут?")
             
-            if ok_pressed:
+            if ok_pressed and name != "" and self.rating != [] and self.count_generation != []:
                 self.user_name = name
-            else:
+            elif name != "":
                 self.generations_field.insertPlainText("Ошибка записи в базу данных: Введите имя пользователя")
                 return 0
+            elif self.rating != [] and self.count_generation != []:
+                self.generations_field.insertPlainText("Ошибка записи в базу данных: Произведите генерацию")
             
             con = sqlite3.connect("generations_db.sqlite")
             cur = con.cursor()
@@ -36,6 +43,39 @@ class GenAlgoritmVisualisation(QMainWindow):
             con.commit()
             con.close
         
+    def read_database(self):
+            name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
+                                            "Как вас зовут?")
+            
+            if ok_pressed and name != "":
+                self.user_name = name
+                self.clear_all()
+            else:
+                self.generations_field.insertPlainText("Ошибка чтения из базы данных: Введите имя пользователя")
+                return 0
+            
+            con = sqlite3.connect("generations_db.sqlite")
+            cur = con.cursor()
+            res = cur.execute(f"SELECT * FROM generations WHERE  user_name LIKE '{self.user_name}'").fetchall()
+            self.db_info = res[0]
+            con.close()
+        
+            self.text_count.setText(f"Количество генераций - {str(self.db_info[2])}")
+            self.text_rating.setText(f"Средний рейтинг всех генераций- {str(self.db_info[3])}")
+            self.len_population.setText(str(self.db_info[4]))
+            self.len_char.setText(str(self.db_info[5]))
+            self.chance_mutation.setText(str(self.db_info[6]))
+            
+            pen = pg.mkPen(color=(255, 0, 0))
+            x = self.db_info[7].strip('[]').replace(' ', '').split(',')
+            x = [float(i) for i in x]
+            y = [int(i) for i in range(self.db_info[2] + 1)]
+            
+            self.graphWidget.plot(y, x, pen = pen, symbol="o", symbolSize=5, symbolBrush="b")
+            self.graphWidget.setBackground('w')
+            
+            
+            
         
     def clear_all(self):
         self.generations_field.setText('')
@@ -43,14 +83,14 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.len_char.setText('')
         self.chance_mutation.setText('')
         self.text_count.setText('')
-        self.count_generation = [0]
-        self.rating = [0]
+        self.count_generation = []
+        self.rating = []
         self.graphWidget.clear()
 
     def start_generate(self):
         self.graphWidget.clear()
-        self.count_generation = [0]
-        self.rating = [0]
+        self.count_generation = []
+        self.rating = []
         self.generations_field.setText('')
         self.generate_population()
 
@@ -170,8 +210,18 @@ class GenAlgoritmVisualisation(QMainWindow):
             self.generation_counter += 1
             
         pen = pg.mkPen(color=(255, 0, 0))
-        self.graphWidget.plot(self.count_generation, self.rating, pen = pen)
+        self.graphWidget.plot(self.count_generation, self.rating, pen = pen, symbol="o", symbolSize=5, symbolBrush="b")
         self.graphWidget.setBackground('w')
+        
+class About(QtWidget):
+        def __init__(self):
+            super().__init__()
+            self.initUI()
+
+        def initUI(self):
+            self.setGeometry(300, 300, 300, 200)
+            self.setWindowTitle('Student log in screen')
+            self.show()
 
 
 if __name__ == '__main__':

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>791</width>
-    <height>352</height>
+    <width>1112</width>
+    <height>518</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -116,7 +116,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>791</width>
+     <width>1112</width>
      <height>26</height>
     </rect>
    </property>
@@ -125,9 +125,16 @@
      <string>Файл</string>
     </property>
     <addaction name="action_database"/>
-    <addaction name="separator"/>
+    <addaction name="action_database_read"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="action"/>
    </widget>
    <addaction name="menu"/>
+   <addaction name="menuAbout"/>
   </widget>
   <action name="actionOpen_txt_file">
    <property name="text">
@@ -137,6 +144,19 @@
   <action name="action_database">
    <property name="text">
     <string>Записать в базу данных</string>
+   </property>
+  </action>
+  <action name="action_database_read">
+   <property name="text">
+    <string>Загрузить из базы данных</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Что такое генетический алгоритм?</string>
    </property>
   </action>
  </widget>
