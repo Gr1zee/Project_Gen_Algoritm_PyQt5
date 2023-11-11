@@ -1,7 +1,6 @@
 import sys, random, sqlite3
 from PyQt5 import uic
-from PyQt5 import QtWidget
-from PyQt5.QtWidgets import QApplication, QMainWindow, QInputDialog, QFileDialog
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QLabel, QMainWindow, QInputDialog, QDialog, QPushButton, QTextBrowser, QVBoxLayout
 import pyqtgraph as pg
 
 class GenAlgoritmVisualisation(QMainWindow):
@@ -11,6 +10,7 @@ class GenAlgoritmVisualisation(QMainWindow):
         
         self.action_database.triggered.connect(self.update_database)
         self.action_database_read.triggered.connect(self.read_database)
+        self.action_question.triggered.connect(self.about_function)
     
         self.start_button.clicked.connect(self.start_generate)
         self.clear_button.clicked.connect(self.clear_all)
@@ -24,6 +24,14 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.graphWidget.setTitle("Средний рейтинг генераций")
         self.graphWidget.setLabel("left", "Средний рейтинг генераций")
         self.graphWidget.setLabel("bottom", "Кол-во генераций")
+        
+        
+    def about_function(self):
+        question = About()
+        if question.exec():
+            pass
+        else:
+            pass
         
     def update_database(self):
             name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
@@ -213,15 +221,26 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.graphWidget.plot(self.count_generation, self.rating, pen = pen, symbol="o", symbolSize=5, symbolBrush="b")
         self.graphWidget.setBackground('w')
         
-class About(QtWidget):
-        def __init__(self):
-            super().__init__()
-            self.initUI()
+class About(QDialog):
+    def __init__(self):
+        super().__init__()
 
-        def initUI(self):
-            self.setGeometry(300, 300, 300, 200)
-            self.setWindowTitle('Student log in screen')
-            self.show()
+        self.setWindowTitle("Что такое генетический алгоритм?")
+        self.setFixedSize(400, 250)
+
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QVBoxLayout()
+        info = QTextBrowser(self)
+        info.setText("Генети́ческий алгори́тм (англ. genetic algorithm) — это эвристический алгоритм поиска, используемый для решения задач оптимизации и моделирования путём случайного подбора, комбинирования и вариации искомых параметров с использованием механизмов, аналогичных естественному отбору в природе. Подробнее: https://habr.com/ru/articles/128704/")
+        info.setReadOnly(True)
+        self.layout.addWidget(info)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
 
 
 if __name__ == '__main__':

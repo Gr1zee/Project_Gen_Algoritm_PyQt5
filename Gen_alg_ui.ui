@@ -129,9 +129,9 @@
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
-     <string>About</string>
+     <string>О Программе</string>
     </property>
-    <addaction name="action"/>
+    <addaction name="action_question"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menuAbout"/>
@@ -151,7 +151,7 @@
     <string>Загрузить из базы данных</string>
    </property>
   </action>
-  <action name="action">
+  <action name="action_question">
    <property name="checkable">
     <bool>false</bool>
    </property>
