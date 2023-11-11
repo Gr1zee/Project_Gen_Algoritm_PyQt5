@@ -1,5 +1,5 @@
 import sys, random, sqlite3
-from PyQt5 import uic
+from PyQt5 import QtGui, uic
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QLabel, QMainWindow, QInputDialog, QDialog, QPushButton, QTextBrowser, QVBoxLayout
 import pyqtgraph as pg
 
@@ -7,10 +7,13 @@ class GenAlgoritmVisualisation(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('Gen_alg_ui.ui', self)
+        self.setWindowIcon(QtGui.QIcon('icon.jpg'))
         
         self.action_database.triggered.connect(self.update_database)
         self.action_database_read.triggered.connect(self.read_database)
         self.action_question.triggered.connect(self.about_function)
+        
+        self.setWindowTitle("Генетический алгоритм")
     
         self.start_button.clicked.connect(self.start_generate)
         self.clear_button.clicked.connect(self.clear_all)
@@ -191,7 +194,10 @@ class GenAlgoritmVisualisation(QMainWindow):
         except Exception:
             self.generations_field.insertPlainText("Ошибка генерации: не указан шанс мутации")
             return
-        the_sought_character = "1" * len_character
+        try:
+            the_sought_character = "1" * len_character
+        except Exception:
+            self.generations_field.insertPlainText("Ошибка генерации: Слишком болшое число")
         self.generation_counter = 1
         find_best_character = True
         while find_best_character:
@@ -228,7 +234,7 @@ class About(QDialog):
         self.setWindowTitle("Что такое генетический алгоритм?")
         self.setFixedSize(400, 250)
 
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        QBtn = QDialogButtonBox.Ok
 
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
