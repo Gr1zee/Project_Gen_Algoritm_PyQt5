@@ -1,93 +1,94 @@
 import sys, random, sqlite3
 from PyQt5 import QtGui, uic
-from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QLabel, QMainWindow, QInputDialog, QDialog, QPushButton, QTextBrowser, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMainWindow, QInputDialog, QDialog, QTextBrowser, \
+    QVBoxLayout
 import pyqtgraph as pg
+
+
+# pyinstaller --add-data "Gen_alg_ui.ui;generations_db.sqlite;icon.jpg;." main.py
 
 class GenAlgoritmVisualisation(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('Gen_alg_ui.ui', self)
         self.setWindowIcon(QtGui.QIcon('icon.jpg'))
-        
+
         self.action_database.triggered.connect(self.update_database)
         self.action_database_read.triggered.connect(self.read_database)
         self.action_question.triggered.connect(self.about_function)
-        
+
         self.setWindowTitle("Генетический алгоритм")
-    
+
         self.start_button.clicked.connect(self.start_generate)
         self.clear_button.clicked.connect(self.clear_all)
-        
+
         self.count_generation = []
         self.rating = []
 
         pen = pg.mkPen(color=(255, 0, 0))
-        self.graphWidget.plot(self.count_generation, self.rating, pen = pen, symbol="+", symbolSize=20, symbolBrush="b")
+        self.graphWidget.plot(self.count_generation, self.rating, pen=pen, symbol="+", symbolSize=20, symbolBrush="b")
         self.graphWidget.setBackground('w')
         self.graphWidget.setTitle("Средний рейтинг генераций")
         self.graphWidget.setLabel("left", "Средний рейтинг генераций")
         self.graphWidget.setLabel("bottom", "Кол-во генераций")
-        
-        
+
     def about_function(self):
         question = About()
         if question.exec():
             pass
         else:
             pass
-        
+
     def update_database(self):
-            name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
-                                            "Как вас зовут?")
-            
-            if ok_pressed and name != "" and self.rating != [] and self.count_generation != []:
-                self.user_name = name
-            elif name != "":
-                self.generations_field.insertPlainText("Ошибка записи в базу данных: Введите имя пользователя")
-                return 0
-            elif self.rating != [] and self.count_generation != []:
-                self.generations_field.insertPlainText("Ошибка записи в базу данных: Произведите генерацию")
-            
-            con = sqlite3.connect("generations_db.sqlite")
-            cur = con.cursor()
-            cur.execute(f"INSERT INTO generations(user_name, generation_count, average_rating, len_population, len_character, chance_mutation, rating_lst) VALUES ('{self.user_name}', '{self.generation_counter}', '{round(self.average_rating, 3)}', '{int(self.len_population.text())}', '{int(self.len_char.text())}', '{int(self.chance_mutation.text())}', '{str(self.rating)}')")
-            con.commit()
-            con.close
-        
+        name, ok_pressed = QInputDialog.getText(self, "Введите имя",
+                                                "Как вас зовут?")
+
+        if ok_pressed and name != "" and self.rating != [] and self.count_generation != []:
+            self.user_name = name
+        elif name != "":
+            self.generations_field.insertPlainText("Ошибка записи в базу данных: Введите имя пользователя")
+            return 0
+        elif self.rating != [] and self.count_generation != []:
+            self.generations_field.insertPlainText("Ошибка записи в базу данных: Произведите генерацию")
+
+        con = sqlite3.connect("generations_db.sqlite")
+        cur = con.cursor()
+        cur.execute(
+            f"INSERT INTO generations(user_name, generation_count, average_rating, len_population, len_character, chance_mutation, rating_lst) VALUES ('{self.user_name}', '{self.generation_counter}', '{round(self.average_rating, 3)}', '{int(self.len_population.text())}', '{int(self.len_char.text())}', '{int(self.chance_mutation.text())}', '{str(self.rating)}')")
+        con.commit()
+        con.close
+
     def read_database(self):
-            name, ok_pressed = QInputDialog.getText(self, "Введите имя", 
-                                            "Как вас зовут?")
-            
-            if ok_pressed and name != "":
-                self.user_name = name
-                self.clear_all()
-            else:
-                self.generations_field.insertPlainText("Ошибка чтения из базы данных: Введите имя пользователя")
-                return 0
-            
-            con = sqlite3.connect("generations_db.sqlite")
-            cur = con.cursor()
-            res = cur.execute(f"SELECT * FROM generations WHERE  user_name LIKE '{self.user_name}'").fetchall()
-            self.db_info = res[0]
-            con.close()
-        
-            self.text_count.setText(f"Количество генераций - {str(self.db_info[2])}")
-            self.text_rating.setText(f"Средний рейтинг всех генераций- {str(self.db_info[3])}")
-            self.len_population.setText(str(self.db_info[4]))
-            self.len_char.setText(str(self.db_info[5]))
-            self.chance_mutation.setText(str(self.db_info[6]))
-            
-            pen = pg.mkPen(color=(255, 0, 0))
-            x = self.db_info[7].strip('[]').replace(' ', '').split(',')
-            x = [float(i) for i in x]
-            y = [int(i) for i in range(self.db_info[2] + 1)]
-            
-            self.graphWidget.plot(y, x, pen = pen, symbol="o", symbolSize=5, symbolBrush="b")
-            self.graphWidget.setBackground('w')
-            
-            
-            
-        
+        name, ok_pressed = QInputDialog.getText(self, "Введите имя",
+                                                "Как вас зовут?")
+
+        if ok_pressed and name != "":
+            self.user_name = name
+            self.clear_all()
+        else:
+            self.generations_field.insertPlainText("Ошибка чтения из базы данных: Введите имя пользователя")
+            return 0
+
+        con = sqlite3.connect("generations_db.sqlite")
+        cur = con.cursor()
+        res = cur.execute(f"SELECT * FROM generations WHERE  user_name LIKE '{self.user_name}'").fetchall()
+        self.db_info = res[0]
+        con.close()
+
+        self.text_count.setText(f"Количество генераций - {str(self.db_info[2])}")
+        self.text_rating.setText(f"Средний рейтинг всех генераций- {str(self.db_info[3])}")
+        self.len_population.setText(str(self.db_info[4]))
+        self.len_char.setText(str(self.db_info[5]))
+        self.chance_mutation.setText(str(self.db_info[6]))
+
+        pen = pg.mkPen(color=(255, 0, 0))
+        x = self.db_info[7].strip('[]').replace(' ', '').split(',')
+        x = [float(i) for i in x]
+        y = [int(i) for i in range(self.db_info[2] + 1)]
+
+        self.graphWidget.plot(y, x, pen=pen, symbol="o", symbolSize=5, symbolBrush="b")
+        self.graphWidget.setBackground('w')
+
     def clear_all(self):
         self.generations_field.setText('')
         self.len_population.setText('')
@@ -209,11 +210,11 @@ class GenAlgoritmVisualisation(QMainWindow):
             self.rating.append(float(self.success_rate(current_population)))
             self.rating_a += float(self.success_rate(current_population))
             self.generations_field.insertPlainText(f"{self.best_character(current_population)} \n")
-            
+
             self.count_generation.append(self.generation_counter)
-            
+
             self.average_rating = self.rating_a / self.generation_counter
-            
+
             if the_sought_character in current_population and find_best_character:
                 self.text_count.setText(f"Количество генераций - {self.generation_counter}")
                 self.text_rating.setText(f"Средний рейтинг всех генераций- {round(self.average_rating, 3)}")
@@ -222,11 +223,12 @@ class GenAlgoritmVisualisation(QMainWindow):
             self.generations_field.insertPlainText("\n")
 
             self.generation_counter += 1
-            
+
         pen = pg.mkPen(color=(255, 0, 0))
-        self.graphWidget.plot(self.count_generation, self.rating, pen = pen, symbol="o", symbolSize=5, symbolBrush="b")
+        self.graphWidget.plot(self.count_generation, self.rating, pen=pen, symbol="o", symbolSize=5, symbolBrush="b")
         self.graphWidget.setBackground('w')
-        
+
+
 class About(QDialog):
     def __init__(self):
         super().__init__()
@@ -242,11 +244,13 @@ class About(QDialog):
 
         self.layout = QVBoxLayout()
         info = QTextBrowser(self)
-        info.setText("Генети́ческий алгори́тм (англ. genetic algorithm) — это эвристический алгоритм поиска, используемый для решения задач оптимизации и моделирования путём случайного подбора, комбинирования и вариации искомых параметров с использованием механизмов, аналогичных естественному отбору в природе. Подробнее: https://habr.com/ru/articles/128704/")
+        info.setText(
+            "Генети́ческий алгори́тм (англ. genetic algorithm) — это эвристический алгоритм поиска, используемый для решения задач оптимизации и моделирования путём случайного подбора, комбинирования и вариации искомых параметров с использованием механизмов, аналогичных естественному отбору в природе. Подробнее: https://habr.com/ru/articles/128704/")
         info.setReadOnly(True)
         self.layout.addWidget(info)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
+
 
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
