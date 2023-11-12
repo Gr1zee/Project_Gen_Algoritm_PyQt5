@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMainWindow, QInputD
 import pyqtgraph as pg
 
 
-# pyinstaller --add-data "Gen_alg_ui.ui;generations_db.sqlite;icon.jpg;." main.py
+# pyinstaller --noconfirm --onefile --windowed --icon "C:/Users/grice/Downloads/icon.ico" --name "Визуализация Генетического алгоритма" --add-data "C:/VS Code Python/Project_Gen_Algoritm_PyQt5;Project_Gen_Algoritm_PyQt5/"  "C:/VS Code Python/Project_Gen_Algoritm_PyQt5/main.py"
 
 class GenAlgoritmVisualisation(QMainWindow):
     def __init__(self):
@@ -95,6 +95,7 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.len_char.setText('')
         self.chance_mutation.setText('')
         self.text_count.setText('')
+        self.text_rating.setText('')
         self.count_generation = []
         self.rating = []
         self.graphWidget.clear()
@@ -182,16 +183,28 @@ class GenAlgoritmVisualisation(QMainWindow):
         self.rating_a = 0
         try:
             len_population = int(self.len_population.text())
+            if len_population < 0:
+                self.generations_field.insertPlainText("Ошибка генерации: Указана отрицательная длина")
+                return
         except Exception:
-            self.generations_field.insertPlainText("Ошибка генерации: не указано количество особей в популяции")
+            self.generations_field.insertPlainText("Ошибка генерации: Не указано количество особей в популяции")
             return
         try:
             len_character = int(self.len_char.text())
+            if len_character < 0:
+                self.generations_field.insertPlainText("Ошибка генерации: Указана отрицательная длина")
+                return
         except Exception:
-            self.generations_field.insertPlainText("Ошибка генерации: не указана длина особи")
+            self.generations_field.insertPlainText("Ошибка генерации: Не указана длина особи")
             return
         try:
             mutation_chance = int(self.chance_mutation.text())
+            if mutation_chance > 100:
+                self.generations_field.insertPlainText("Ошибка генерации: Введите шанс мутации от 0 до 100")
+                return 
+            if mutation_chance < 0:
+                self.generations_field.insertPlainText("Ошибка генерации: Указан отрицательный шанс мутации")
+                return
         except Exception:
             self.generations_field.insertPlainText("Ошибка генерации: не указан шанс мутации")
             return
@@ -205,11 +218,12 @@ class GenAlgoritmVisualisation(QMainWindow):
             first_population = self.generate_list(len_character, len_population)
             current_population = self.generation(first_population, mutation_chance)
 
-            self.generations_field.insertPlainText(f"{str(current_population)} \n")
-            self.generations_field.insertPlainText(f"{str(self.success_rate(current_population))} \n")
+            self.generations_field.insertPlainText(f"Популяция - {str(current_population)} \n")
+            self.generations_field.insertPlainText(f"Средний рейтинг - {str(self.success_rate(current_population))} \n")
             self.rating.append(float(self.success_rate(current_population)))
             self.rating_a += float(self.success_rate(current_population))
-            self.generations_field.insertPlainText(f"{self.best_character(current_population)} \n")
+            self.generations_field.insertPlainText(f"Лучшая особь - {self.best_character(current_population)} \n")
+            self.generations_field.insertPlainText(f"-------------------------------------------------------------------------------------\n")
 
             self.count_generation.append(self.generation_counter)
 
