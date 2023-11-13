@@ -1,21 +1,198 @@
+import io
 import sys, random, sqlite3
 from PyQt5 import QtGui, uic
 from PyQt5.QtWidgets import QApplication, QDialogButtonBox, QMainWindow, QInputDialog, QDialog, QTextBrowser, \
     QVBoxLayout
 import pyqtgraph as pg
 
+template = """<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1112</width>
+    <height>518</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" rowspan="2">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="start_button">
+          <property name="text">
+           <string>▶</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clear_button">
+          <property name="text">
+           <string>Очистить всё</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>278</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="text_count">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="text_rating">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTextBrowser" name="generations_field"/>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="1">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="text_len">
+        <property name="text">
+         <string>Введите кол-во особей в одном поколении:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="len_population"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="text_len_c">
+        <property name="text">
+         <string>Введите кол-во символов в одной особи:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="len_char"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="text_chance">
+        <property name="text">
+         <string>Введите шанс мутации:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="chance_mutation"/>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <widget class="PlotWidget" name="graphWidget" native="true"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1112</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="action_database"/>
+    <addaction name="action_database_read"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>О Программе</string>
+    </property>
+    <addaction name="action_question"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <action name="actionOpen_txt_file">
+   <property name="text">
+    <string>Открыть</string>
+   </property>
+  </action>
+  <action name="action_database">
+   <property name="text">
+    <string>Записать в базу данных</string>
+   </property>
+  </action>
+  <action name="action_database_read">
+   <property name="text">
+    <string>Загрузить из базы данных</string>
+   </property>
+  </action>
+  <action name="action_question">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Что такое генетический алгоритм?</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header>pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
+"""
 
-# pyinstaller --noconfirm --onefile --windowed --icon "C:/Users/grice/Downloads/icon.ico" --name "Визуализация Генетического алгоритма" --add-data "C:/VS Code Python/Project_Gen_Algoritm_PyQt5;Project_Gen_Algoritm_PyQt5/"  "C:/VS Code Python/Project_Gen_Algoritm_PyQt5/main.py"
 
 class GenAlgoritmVisualisation(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('Gen_alg_ui.ui', self)
+        f = io.StringIO(template)
+        uic.loadUi(f, self)
         self.setWindowIcon(QtGui.QIcon('icon.jpg'))
 
         self.action_database.triggered.connect(self.update_database)
         self.action_database_read.triggered.connect(self.read_database)
         self.action_question.triggered.connect(self.about_function)
+
+        self.generations = []
 
         self.setWindowTitle("Генетический алгоритм")
 
@@ -45,16 +222,17 @@ class GenAlgoritmVisualisation(QMainWindow):
 
         if ok_pressed and name != "" and self.rating != [] and self.count_generation != []:
             self.user_name = name
-        elif name != "":
+        elif name == "":
             self.generations_field.insertPlainText("Ошибка записи в базу данных: Введите имя пользователя")
             return 0
         elif self.rating != [] and self.count_generation != []:
             self.generations_field.insertPlainText("Ошибка записи в базу данных: Произведите генерацию")
+            return
 
         con = sqlite3.connect("generations_db.sqlite")
         cur = con.cursor()
         cur.execute(
-            f"INSERT INTO generations(user_name, generation_count, average_rating, len_population, len_character, chance_mutation, rating_lst) VALUES ('{self.user_name}', '{self.generation_counter}', '{round(self.average_rating, 3)}', '{int(self.len_population.text())}', '{int(self.len_char.text())}', '{int(self.chance_mutation.text())}', '{str(self.rating)}')")
+            f"""INSERT INTO generations(user_name, generation_count, average_rating, len_population, len_character, chance_mutation, rating_lst) VALUES ('{self.user_name}', '{self.generation_counter}', '{round(self.average_rating, 3)}', '{int(self.len_population.text())}', '{int(self.len_char.text())}', '{int(self.chance_mutation.text())}', '{str(self.rating)}')""")
         con.commit()
         con.close
 
@@ -84,7 +262,9 @@ class GenAlgoritmVisualisation(QMainWindow):
         pen = pg.mkPen(color=(255, 0, 0))
         x = self.db_info[7].strip('[]').replace(' ', '').split(',')
         x = [float(i) for i in x]
-        y = [int(i) for i in range(self.db_info[2] + 1)]
+        y = [int(i) for i in range(1, self.db_info[2] + 1)]
+        print(len(x))
+        print(len(y))
 
         self.graphWidget.plot(y, x, pen=pen, symbol="o", symbolSize=5, symbolBrush="b")
         self.graphWidget.setBackground('w')
@@ -201,7 +381,7 @@ class GenAlgoritmVisualisation(QMainWindow):
             mutation_chance = int(self.chance_mutation.text())
             if mutation_chance > 100:
                 self.generations_field.insertPlainText("Ошибка генерации: Введите шанс мутации от 0 до 100")
-                return 
+                return
             if mutation_chance < 0:
                 self.generations_field.insertPlainText("Ошибка генерации: Указан отрицательный шанс мутации")
                 return
@@ -219,11 +399,13 @@ class GenAlgoritmVisualisation(QMainWindow):
             current_population = self.generation(first_population, mutation_chance)
 
             self.generations_field.insertPlainText(f"Популяция - {str(current_population)} \n")
+            self.generations.append(current_population)
             self.generations_field.insertPlainText(f"Средний рейтинг - {str(self.success_rate(current_population))} \n")
             self.rating.append(float(self.success_rate(current_population)))
             self.rating_a += float(self.success_rate(current_population))
             self.generations_field.insertPlainText(f"Лучшая особь - {self.best_character(current_population)} \n")
-            self.generations_field.insertPlainText(f"-------------------------------------------------------------------------------------\n")
+            self.generations_field.insertPlainText(
+                f"-------------------------------------------------------------------------------------\n")
 
             self.count_generation.append(self.generation_counter)
 
